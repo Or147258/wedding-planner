@@ -11,10 +11,6 @@ import {
  *  Project settings ⚙ → General → Your apps → Web app → SDK setup and configuration
  *  (המפתחות אינם סוד — ההגנה האמיתית היא חוקי האבטחה ב-firestore.rules)
  * ------------------------------------------------------------------ */
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -26,8 +22,6 @@ const firebaseConfig = {
   appId: "1:670936078654:web:26d374bf304a4ebf5d746f"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
 
 // כל עוד המפתחות ריקים האפליקציה מציגה מסך הסבר (SetupNotice) במקום להתרסק
 export const isFirebaseConfigured = Boolean(firebaseConfig.apiKey && firebaseConfig.projectId);
