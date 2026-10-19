@@ -1,4 +1,4 @@
-export default function Navbar({ tabs, active }) {
+export default function Navbar({ tabs, active, userEmail, onSignOut }) {
   return (
     <header className="sticky top-0 z-30 border-b border-stone-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 px-4">
@@ -28,6 +28,19 @@ export default function Navbar({ tabs, active }) {
             );
           })}
         </nav>
+
+        {onSignOut && (
+          <div className="flex items-center gap-2 py-2 text-xs text-stone-500">
+            {userEmail && (
+              <span dir="ltr" className="hidden max-w-[180px] truncate sm:inline">
+                {userEmail}
+              </span>
+            )}
+            <button type="button" className="btn-secondary px-3 py-1.5 text-xs" onClick={onSignOut}>
+              יציאה
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

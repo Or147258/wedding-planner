@@ -1,0 +1,23 @@
+rules_version = '2';
+
+// להדביק ב-Firebase Console → Firestore Database → Rules → Publish
+// חשוב: להחליף את שתי הכתובות בכתובות המייל (באותיות קטנות) של אור ועדן,
+// בדיוק כפי שהן מוגדרות ב-Authentication → Users.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isCouple() {
+      return request.auth != null
+        && request.auth.token.email in [
+          'or@example.com',
+          'eden@example.com'
+        ];
+    }
+
+    match /guests/{id}   { allow read, write: if isCouple(); }
+    match /vendors/{id}  { allow read, write: if isCouple(); }
+    match /tasks/{id}    { allow read, write: if isCouple(); }
+    match /tables/{id}   { allow read, write: if isCouple(); }
+    match /settings/{id} { allow read, write: if isCouple(); }
+  }
+}

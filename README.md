@@ -25,11 +25,41 @@ npm run dev
 
 בנייה לפרודקשן: `npm run build` (התוצאה נוצרת בתיקיית `dist`), ובדיקה מקומית שלה: `npm run preview`.
 
-## שמירת נתונים
+## שמירת נתונים וסנכרון בזמן אמת (Firebase / Firestore)
 
-כל הנתונים נשמרים ב-`localStorage` של הדפדפן, כלומר הם נשארים גם אחרי רענון, אך קיימים רק במחשב ובדפדפן שבהם הוזנו.
-כדי לעבוד מכמה מכשירים או לשתף עם בן/בת הזוג יהיה צורך להוסיף שרת/מסד נתונים (למשל Firebase או Supabase).
-את הנתונים אפשר לגבות בעזרת כפתורי "ייצוא לאקסל".
+הנתונים נשמרים ב-**Firestore** ומסתנכרנים בזמן אמת בין כל המכשירים (`onSnapshot`).
+שינוי שאחד מכם עושה מופיע אצל השני תוך רגע, ואפשר להמשיך לעבוד גם בלי אינטרנט — השינויים מסתנכרנים כשהחיבור חוזר.
+
+### הגדרה חד-פעמית
+
+1. ב-[Firebase Console](https://console.firebase.google.com) צרו פרויקט.
+2. **Build ← Firestore Database ← Create database** (מצב Production, ובחרו אזור קרוב, למשל `europe-west1`).
+3. **Build ← Authentication ← Get started ← Email/Password**: הפעילו, ואז בלשונית **Users** הוסיפו משתמש לאור ומשתמש לעדן (אימייל + סיסמה).
+4. **Project settings ← Your apps ← Web (`</>`)**: רשמו את האפליקציה והעתיקו את אובייקט `firebaseConfig`.
+5. הדביקו את הערכים בקובץ `src/firebase.js`.
+6. **Firestore ← Rules**: הדביקו את תוכן `firestore.rules`, **החליפו את שתי הכתובות בכתובות האמיתיות שלכם (באותיות קטנות)** ולחצו Publish.
+7. `npm install` ואז `npm run dev`, והתחברו עם אחד המשתמשים.
+
+### מבנה הנתונים
+
+```
+guests/{id}   vendors/{id}   tasks/{id}   tables/{id}
+settings/categories  →  { list: [...] }
+```
+
+### אבטחה
+
+מפתחות `firebaseConfig` אינם סוד: הם נחשפים בקוד שרץ בדפדפן. ההגנה האמיתית היא:
+
+- **מסך התחברות** (Email/Password) — האפליקציה נטענת רק למשתמש מחובר.
+- **חוקי Firestore** (`firestore.rules`) — מאפשרים קריאה וכתיבה רק לשתי כתובות המייל שלכם. גם מי שיצליח ליצור משתמש אחר לא יראה את הנתונים.
+
+אל תשתמשו ב-`allow read, write: if true` — כך כל מי שמכיר את כתובת האתר יכול לקרוא ולמחוק את הרשימה.
+
+### ייבוא נתונים מהגרסה הקודמת
+
+אם יש לכם נתונים שהוזנו בגרסת ה-localStorage, בכניסה הראשונה (כש-Firestore ריק) יופיע באנר ״ייבוא ל-Firebase״.
+הייבוא רץ מהדפדפן שבו הוזנו הנתונים. את הנתונים אפשר לגבות גם בעזרת כפתורי "ייצוא לאקסל".
 
 ## ייצוא לאקסל
 
@@ -40,7 +70,10 @@ npm run dev
 
 ```
 src/
-├── App.jsx                  # state מרכזי, ניווט בין הדפים
+├── firebase.js              # אתחול Firebase + Auth — כאן מדביקים את המפתחות
+├── App.jsx                  # מסך הגדרה אם אין מפתחות, אחרת התחברות ואז האפליקציה
+├── WeddingApp.jsx           # האזנה ל-Firestore, פעולות CRUD, ניווט בין הדפים
+├── services/weddingApi.js   # כתיבה/עדכון/מחיקה מול Firestore
 ├── pages/
 │   ├── GuestsPage.jsx
 │   ├── BudgetPage.jsx
@@ -52,8 +85,8 @@ src/
 │   ├── budget/              # VendorForm, VendorTable
 │   ├── tasks/               # TaskForm, TaskItem
 │   └── seating/             # TableForm, TableCard, UnassignedList
-├── hooks/useLocalStorage.js
-└── utils/                   # constants, helpers, guestStats, exportExcel, dnd
+├── hooks/useFirestore.js    # onSnapshot לכל אוסף
+└── utils/                   # constants, helpers, guestStats, exportExcel, dnd, migrateLocalData
 ```
 
 ## התאמות נפוצות
