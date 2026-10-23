@@ -5,10 +5,11 @@ export default function GuestTable({ guests, onEdit, onDelete, onRsvpChange }) {
   return (
     <div className="card overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[760px]">
+        <table className="w-full min-w-[880px]">
           <thead className="border-b border-stone-200 bg-stone-50">
             <tr>
               <th className="th">שם המוזמן / משפחה</th>
+              <th className="th">פלאפון</th>
               <th className="th">כמות</th>
               <th className="th">צד</th>
               <th className="th">קרבה</th>
@@ -22,6 +23,19 @@ export default function GuestTable({ guests, onEdit, onDelete, onRsvpChange }) {
             {guests.map((g) => (
               <tr key={g.id} className="hover:bg-stone-50/60">
                 <td className="td font-medium">{g.name}</td>
+                <td className="td whitespace-nowrap tabular-nums">
+                  {g.phone ? (
+                    <a
+                      href={`tel:${g.phone.replace(/[^\d+]/g, '')}`}
+                      dir="ltr"
+                      className="text-stone-700 hover:text-rose-600 hover:underline"
+                    >
+                      {g.phone}
+                    </a>
+                  ) : (
+                    <span className="text-stone-300">—</span>
+                  )}
+                </td>
                 <td className="td tabular-nums">{g.count}</td>
                 <td className="td">
                   <span

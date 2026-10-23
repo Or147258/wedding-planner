@@ -11,7 +11,7 @@ import { computeGuestStats } from '../utils/guestStats';
 import { exportSheets } from '../utils/exportExcel';
 import { sumBy } from '../utils/helpers';
 
-const GUEST_HEADER = ['שם המוזמן / משפחה', 'כמות מוזמנים', 'צד', 'קרבה', 'סטטוס אישור הגעה'];
+const GUEST_HEADER = ['שם המוזמן / משפחה', 'מספר פלאפון', 'כמות מוזמנים', 'צד', 'קרבה', 'סטטוס אישור הגעה'];
 const SUMMARY_HEADER = ['נושא', 'סה״כ מוזמנים', 'אישרו הגעה'];
 
 export default function GuestsPage({ guests, categories, onAdd, onUpdate, onDelete, onAddCategory }) {
@@ -23,11 +23,16 @@ export default function GuestsPage({ guests, categories, onAdd, onUpdate, onDele
   const stats = computeGuestStats(guests, categories);
 
   const q = query.trim();
+  const qDigits = q.replace(/\D/g, '');
+  const matchesQuery = (g) =>
+    !q ||
+    g.name.includes(q) ||
+    (qDigits.length > 0 && (g.phone ?? '').replace(/\D/g, '').includes(qDigits));
   const filtered = guests.filter(
     (g) =>
       (sideFilter === 'all' || g.side === sideFilter) &&
       (rsvpFilter === 'all' || g.rsvp === rsvpFilter) &&
-      (!q || g.name.includes(q))
+      matchesQuery(g)
   );
 
   const closeModal = () => setModal({ open: false, guest: null });
@@ -45,6 +50,7 @@ export default function GuestsPage({ guests, categories, onAdd, onUpdate, onDele
   const handleExport = () => {
     const rows = guests.map((g) => ({
       'שם המוזמן / משפחה': g.name,
+      'מספר פלאפון': g.phone || '',
       'כמות מוזמנים': g.count,
       צד: SIDES[g.side]?.label ?? '',
       קרבה: g.category,
@@ -66,7 +72,7 @@ export default function GuestsPage({ guests, categories, onAdd, onUpdate, onDele
     ];
 
     exportSheets('רשימת_מוזמנים.xlsx', [
-      { name: 'מוזמנים', rows, header: GUEST_HEADER, widths: [28, 14, 14, 14, 18] },
+      { name: 'מוזמנים', rows, header: GUEST_HEADER, widths: [28, 16, 14, 14, 14, 18] },
       { name: 'סיכום', rows: summary, header: SUMMARY_HEADER, widths: [28, 16, 14] },
     ]);
   };
@@ -103,7 +109,7 @@ export default function GuestsPage({ guests, categories, onAdd, onUpdate, onDele
               <SearchIcon className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-stone-400" />
               <input
                 className="input ps-10"
-                placeholder="חיפוש לפי שם…"
+                placeholder="חיפוש לפי שם או טלפון…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 aria-label="חיפוש מוזמן"

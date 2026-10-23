@@ -5,6 +5,7 @@ import { RSVP, SIDES } from '../../utils/constants';
 export default function GuestForm({ initial, categories, onAddCategory, onSubmit, onCancel }) {
   const [form, setForm] = useState(() => ({
     name: initial?.name ?? '',
+    phone: initial?.phone ?? '',
     count: initial?.count ?? 1,
     side: initial?.side ?? 'groom',
     category: initial?.category ?? categories[0] ?? '',
@@ -30,7 +31,12 @@ export default function GuestForm({ initial, categories, onAddCategory, onSubmit
     if (!form.name.trim()) return setError('נא להזין שם מוזמן או משפחה');
     if (!count || count < 1) return setError('כמות המוזמנים חייבת להיות לפחות 1');
     if (!form.category) return setError('נא לבחור קרבה');
-    return onSubmit({ ...form, name: form.name.trim(), count });
+    const phone = form.phone.trim();
+    const digits = phone.replace(/\D/g, '');
+    if (phone && (digits.length < 9 || digits.length > 13)) {
+      return setError('מספר הפלאפון אינו תקין (לדוגמה 050-1234567)');
+    }
+    return onSubmit({ ...form, name: form.name.trim(), phone, count });
   };
 
   return (
@@ -46,6 +52,23 @@ export default function GuestForm({ initial, categories, onAddCategory, onSubmit
           value={form.name}
           onChange={(e) => set('name', e.target.value)}
           placeholder="לדוגמה: משפחת כהן"
+        />
+      </div>
+
+      <div>
+        <label className="label" htmlFor="guest-phone">
+          מספר פלאפון
+        </label>
+        <input
+          id="guest-phone"
+          type="tel"
+          inputMode="tel"
+          dir="ltr"
+          autoComplete="off"
+          className="input text-end"
+          value={form.phone}
+          onChange={(e) => set('phone', e.target.value)}
+          placeholder="050-1234567"
         />
       </div>
 
