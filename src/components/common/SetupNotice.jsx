@@ -16,7 +16,8 @@ export default function SetupNotice() {
           </li>
           <li>
             העתיקו את אובייקט ה-<code dir="ltr">firebaseConfig</code> לקובץ{' '}
-            <code dir="ltr">src/firebase.js</code> (הוא כרגע ריק).
+            <code dir="ltr">src/firebase.js</code> (הוא כרגע ריק), או הגדירו אותם כמשתני סביבה{' '}
+            <code dir="ltr">VITE_FIREBASE_*</code> (ראו <code dir="ltr">.env.example</code>).
           </li>
           <li>
             הפעילו <span dir="ltr">Authentication → Email/Password</span> וצרו משתמש לכל אחד מכם (ואז הדביקו

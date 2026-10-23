@@ -1,5 +1,17 @@
-import { SIDES } from './constants';
+import { MEALS, SIDES } from './constants';
 import { sumBy } from './helpers';
+
+const MEAL_KEYS = Object.keys(MEALS);
+
+// כמה מנות מכל סוג יש בהזמנה אחת. מנה רגילה = כמות מוזמנים פחות המנות המיוחדות.
+export function mealsOf(guest) {
+  const result = {};
+  MEAL_KEYS.forEach((key) => {
+    result[key] = Number(guest.meals?.[key]) || 0;
+  });
+  const special = sumBy(MEAL_KEYS, (key) => result[key]);
+  return { regular: Math.max(0, (Number(guest.count) || 0) - special), ...result };
+}
 
 // מחשב את נתוני הדשבורד של דף המוזמנים (משמש גם את הדשבורד וגם את גיליון הסיכום בייצוא)
 export function computeGuestStats(guests, categories) {
@@ -25,13 +37,20 @@ export function computeGuestStats(guests, categories) {
     ...slice(guests.filter((g) => g.category === name)),
   }));
 
+  const confirmedGuests = guests.filter((g) => g.rsvp === 'confirmed');
+  const meals = [
+    { key: 'regular', label: 'מנה רגילה' },
+    ...MEAL_KEYS.map((key) => ({ key, label: MEALS[key].label })),
+  ].map((m) => ({
+    ...m,
+    total: sumBy(guests, (g) => mealsOf(g)[m.key]),
+    confirmed: sumBy(confirmedGuests, (g) => mealsOf(g)[m.key]),
+  }));
+
   return {
     invitations: guests.length,
     total: sumBy(guests, (g) => g.count),
-    confirmed: sumBy(
-      guests.filter((g) => g.rsvp === 'confirmed'),
-      (g) => g.count
-    ),
+    confirmed: sumBy(confirmedGuests, (g) => g.count),
     undecided: sumBy(
       guests.filter((g) => g.rsvp === 'pending' || g.rsvp === 'maybe'),
       (g) => g.count
@@ -42,5 +61,6 @@ export function computeGuestStats(guests, categories) {
     ),
     bySide,
     byCategory,
+    meals,
   };
 }

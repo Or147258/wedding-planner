@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { PlusIcon } from '../common/Icons';
-import { RSVP, SIDES } from '../../utils/constants';
+import { MEALS, RSVP, SIDES } from '../../utils/constants';
+import { sumBy } from '../../utils/helpers';
+
+const MEAL_KEYS = Object.keys(MEALS);
 
 export default function GuestForm({ initial, categories, onAddCategory, onSubmit, onCancel }) {
   const [form, setForm] = useState(() => ({
@@ -10,12 +13,15 @@ export default function GuestForm({ initial, categories, onAddCategory, onSubmit
     side: initial?.side ?? 'groom',
     category: initial?.category ?? categories[0] ?? '',
     rsvp: initial?.rsvp ?? 'pending',
+    // כמות המנות המיוחדות בהזמנה (ריק = 0)
+    meals: Object.fromEntries(MEAL_KEYS.map((k) => [k, initial?.meals?.[k] || ''])),
   }));
   const [addingCategory, setAddingCategory] = useState(false);
   const [newCategory, setNewCategory] = useState('');
   const [error, setError] = useState('');
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+  const setMeal = (key, value) => setForm((f) => ({ ...f, meals: { ...f.meals, [key]: value } }));
 
   const commitCategory = () => {
     const name = newCategory.trim();
@@ -28,16 +34,34 @@ export default function GuestForm({ initial, categories, onAddCategory, onSubmit
   const submit = (e) => {
     e.preventDefault();
     const count = parseInt(form.count, 10);
-    if (!form.name.trim()) return setError('נא להזין שם מוזמן או משפחה');
-    if (!count || count < 1) return setError('כמות המוזמנים חייבת להיות לפחות 1');
-    if (!form.category) return setError('נא לבחור קרבה');
     const phone = form.phone.trim();
     const digits = phone.replace(/\D/g, '');
+    const meals = Object.fromEntries(MEAL_KEYS.map((k) => [k, parseInt(form.meals[k], 10) || 0]));
+
+    if (!form.name.trim()) return setError('נא להזין שם מוזמן או משפחה');
     if (phone && (digits.length < 9 || digits.length > 13)) {
       return setError('מספר הפלאפון אינו תקין (לדוגמה 050-1234567)');
     }
-    return onSubmit({ ...form, name: form.name.trim(), phone, count });
+    if (!count || count < 1) return setError('כמות המוזמנים חייבת להיות לפחות 1');
+    if (!form.category) return setError('נא לבחור קרבה');
+    if (Object.values(meals).some((n) => n < 0)) return setError('כמות מנות לא יכולה להיות שלילית');
+    if (sumBy(MEAL_KEYS, (k) => meals[k]) > count) {
+      return setError('סך המנות המיוחדות גדול מכמות המוזמנים בהזמנה');
+    }
+
+    return onSubmit({
+      name: form.name.trim(),
+      phone,
+      count,
+      side: form.side,
+      category: form.category,
+      rsvp: form.rsvp,
+      meals,
+    });
   };
+
+  const specialTotal = sumBy(MEAL_KEYS, (k) => parseInt(form.meals[k], 10) || 0);
+  const regularLeft = (parseInt(form.count, 10) || 0) - specialTotal;
 
   return (
     <form onSubmit={submit} className="space-y-4">
@@ -105,8 +129,8 @@ export default function GuestForm({ initial, categories, onAddCategory, onSubmit
         </div>
       </div>
 
-      <div>
-        <span className="label">צד</span>
+      <fieldset>
+        <legend className="label">צד</legend>
         <div className="grid grid-cols-2 gap-2">
           {Object.entries(SIDES).map(([key, s]) => (
             <button
@@ -124,7 +148,7 @@ export default function GuestForm({ initial, categories, onAddCategory, onSubmit
             </button>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       <div>
         <label className="label" htmlFor="guest-category">
@@ -171,12 +195,42 @@ export default function GuestForm({ initial, categories, onAddCategory, onSubmit
               className="btn-secondary whitespace-nowrap"
               onClick={() => setAddingCategory(true)}
             >
-              <PlusIcon width={16} height={16} />
+              <PlusIcon width={16} />
               קטגוריה חדשה
             </button>
           </div>
         )}
       </div>
+
+      <fieldset>
+        <legend className="label">
+          העדפות תזונה / ילדים{' '}
+          <span className="font-normal text-stone-400">(כמה מנות מכל סוג, מתוך ההזמנה)</span>
+        </legend>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {MEAL_KEYS.map((key) => (
+            <div key={key}>
+              <label className="mb-1 block text-xs text-stone-600" htmlFor={`meal-${key}`}>
+                {MEALS[key].label}
+              </label>
+              <input
+                id={`meal-${key}`}
+                type="number"
+                min="0"
+                className="input"
+                value={form.meals[key]}
+                onChange={(e) => setMeal(key, e.target.value)}
+                placeholder="0"
+              />
+            </div>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-stone-500">
+          {regularLeft >= 0
+            ? `מנות רגילות: ${regularLeft}`
+            : 'סך המנות המיוחדות גדול מכמות המוזמנים'}
+        </p>
+      </fieldset>
 
       {error && (
         <p role="alert" className="text-sm text-red-600">

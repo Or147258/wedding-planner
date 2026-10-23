@@ -1,8 +1,3 @@
-export const uid = () =>
-  typeof crypto !== 'undefined' && crypto.randomUUID
-    ? crypto.randomUUID()
-    : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
-
 const currencyFmt = new Intl.NumberFormat('he-IL', {
   style: 'currency',
   currency: 'ILS',
@@ -27,5 +22,12 @@ export const daysUntil = (iso) =>
   Math.round(
     (new Date(`${iso}T00:00:00`) - new Date(`${todayISO()}T00:00:00`)) / 86400000
   );
+
+// 2027-06-10 → 10/06/2027
+export const formatDate = (iso) => {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+};
 
 export const byHebrewName = (a, b) => a.name.localeCompare(b.name, 'he');

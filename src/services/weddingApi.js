@@ -55,3 +55,7 @@ export const addCategoryName = (name) =>
     { list: arrayUnion(...DEFAULT_CATEGORIES, name) },
     { merge: true }
   );
+
+// תאריך ושעת החתונה (לטיימר) — settings/wedding → { date: 'YYYY-MM-DD', time: 'HH:MM' }
+export const setWeddingDate = ({ date, time }) =>
+  setDoc(doc(db, 'settings', 'wedding'), { date, time }, { merge: true });

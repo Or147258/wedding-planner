@@ -1,97 +1,81 @@
 # תכנון החתונה – אור ועדן
 
-אפליקציית ווב לניהול חתונה, בנויה ב-**React + Tailwind CSS** (עם Vite), בעברית מלאה ובכיוון RTL.
+אפליקציית ווב לניהול חתונה: **React + Tailwind CSS + Firebase (Auth + Firestore)**, בעברית ובכיוון RTL.
+כל הנתונים נשמרים ב-Firestore ומסתנכרנים בזמן אמת בין המכשירים (`onSnapshot`).
 
-## מה יש באפליקציה
+## הדפים
 
-| דף | תכונות |
-|----|--------|
-| **מוזמנים** | טבלה להוספה/עריכה/מחיקה, צד (חתן-אור / כלה-עדן), קרבה עם הוספת קטגוריות חדשות, סטטוס RSVP, דשבורד מספרי (סה״כ, אישרו הגעה, חלוקה לפי צד וקרבה), חיפוש וסינון, ייצוא לאקסל |
-| **תקציב וספקים** | טבלת ספקים עם עלות כוללת, מקדמה ויתרה, סיכום הוצאות/מקדמות/יתרה, ייצוא לאקסל |
-| **משימות** | צ'קליסט עם סימון V, תאריך יעד, סימון איחורים, התקדמות, משימות מוצעות להתחלה |
-| **סידורי הושבה** | הגדרת שולחנות (גם כמה ברצף), גרירה או בחירה מרשימה לשיוך מוזמנים שאישרו הגעה, חיווי ויזואלי של מקומות פנויים, ייצוא לפי שולחנות ולפי אלף-בית |
+| דף | מה יש בו |
+|----|----------|
+| **מוזמנים** | טיימר ספירה לאחור לחתונה · דשבורד (סה״כ, אישרו, חלוקה לפי צד / קרבה / מנות מיוחדות) · כפתורי סינון לפי הצד · טבלה להוספה/עריכה/מחיקה · אייקון וואטסאפ ליד הטלפון · ייצוא לאקסל |
+| **תקציב וספקים** | סיכום הוצאות/מקדמות/יתרה · טבלת ספקים עם תאריך יעד לתשלום היתרה (עם סימון איחור) · ייצוא לאקסל |
+| **משימות** | צ'קליסט עם תאריך יעד וסימון V |
+| **סידורי הושבה** | הגדרת שולחנות · שיוך מוזמנים שאישרו הגעה (גרירה או בחירה) עם חיווי מקומות פנויים · ייצוא לאקסל (לפי שולחנות ולפי אלף-בית) |
+
+ארבעת הצדדים: **צד החתן (אור)**, **צד הכלה (עדן)**, **הוריי החתן**, **הוריי הכלה**.
+
+מנות מיוחדות נספרות לפי כמות בכל הזמנה (למשל משפחה של 4: צמחוני ×1, מנת ילדים ×2), ושאר המוזמנים נחשבים מנה רגילה.
 
 ## הרצה מקומית
 
-דרישות: [Node.js](https://nodejs.org) גרסה 18 ומעלה.
+דרישות: Node.js 18 ומעלה.
 
 ```bash
-cd wedding-planner
 npm install
 npm run dev
 ```
 
-לאחר מכן פתחו בדפדפן את הכתובת שמוצגת בטרמינל (בדרך כלל http://localhost:5173).
-
-בנייה לפרודקשן: `npm run build` (התוצאה נוצרת בתיקיית `dist`), ובדיקה מקומית שלה: `npm run preview`.
-
-## שמירת נתונים וסנכרון בזמן אמת (Firebase / Firestore)
-
-הנתונים נשמרים ב-**Firestore** ומסתנכרנים בזמן אמת בין כל המכשירים (`onSnapshot`).
-שינוי שאחד מכם עושה מופיע אצל השני תוך רגע, ואפשר להמשיך לעבוד גם בלי אינטרנט — השינויים מסתנכרנים כשהחיבור חוזר.
-
-### הגדרה חד-פעמית
+## הגדרת Firebase (חד-פעמית)
 
 1. ב-[Firebase Console](https://console.firebase.google.com) צרו פרויקט.
-2. **Build ← Firestore Database ← Create database** (מצב Production, ובחרו אזור קרוב, למשל `europe-west1`).
-3. **Build ← Authentication ← Get started ← Email/Password**: הפעילו, ואז בלשונית **Users** הוסיפו משתמש לאור ומשתמש לעדן (אימייל + סיסמה).
-4. **Project settings ← Your apps ← Web (`</>`)**: רשמו את האפליקציה והעתיקו את אובייקט `firebaseConfig`.
-5. הדביקו את הערכים בקובץ `src/firebase.js`.
-6. **Firestore ← Rules**: הדביקו את תוכן `firestore.rules`, **החליפו את שתי הכתובות בכתובות האמיתיות שלכם (באותיות קטנות)** ולחצו Publish.
-7. `npm install` ואז `npm run dev`, והתחברו עם אחד המשתמשים.
+2. **Firestore Database ← Create database** (מצב Production).
+3. **Authentication ← Sign-in method ← Email/Password**: הפעילו, ובלשונית **Users** הוסיפו משתמש לאור ומשתמש לעדן.
+4. **Project settings ← Your apps ← Web (`</>`)**: רשמו אפליקציה והעתיקו את `firebaseConfig`.
+5. הדביקו את הערכים ב-`src/firebase.js` (בין הגרשיים), **או** הגדירו אותם כמשתני סביבה `VITE_FIREBASE_*` (ראו `.env.example`).
+6. **Firestore ← Rules**: הדביקו את `firestore.rules`, **החליפו את שתי הכתובות בכתובות המייל האמיתיות שלכם (באותיות קטנות)** ולחצו Publish.
 
-### מבנה הנתונים
+## פריסה ל-Vercel
+
+1. העלו את התיקייה ל-GitHub (או השתמשו ב-Vercel CLI).
+2. ב-[Vercel](https://vercel.com) לחצו **Add New ← Project** ובחרו את המאגר. Vercel מזהה לבד Vite:
+   Build Command `npm run build`, Output Directory `dist`.
+3. אם לא הדבקתם את המפתחות ב-`src/firebase.js`: ב-**Settings ← Environment Variables** הוסיפו את ששת משתני `VITE_FIREBASE_*` (לפני הפריסה).
+4. **חשוב:** ב-Firebase ← Authentication ← Settings ← **Authorized domains** הוסיפו את הדומיין של Vercel (למשל `my-wedding.vercel.app`). בלי זה ההתחברות תיכשל.
+
+## מבנה הנתונים ב-Firestore
 
 ```
 guests/{id}   vendors/{id}   tasks/{id}   tables/{id}
 settings/categories  →  { list: [...] }
+settings/wedding     →  { date: 'YYYY-MM-DD', time: 'HH:MM' }
 ```
 
-### אבטחה
+## אבטחה
 
-מפתחות `firebaseConfig` אינם סוד: הם נחשפים בקוד שרץ בדפדפן. ההגנה האמיתית היא:
-
-- **מסך התחברות** (Email/Password) — האפליקציה נטענת רק למשתמש מחובר.
-- **חוקי Firestore** (`firestore.rules`) — מאפשרים קריאה וכתיבה רק לשתי כתובות המייל שלכם. גם מי שיצליח ליצור משתמש אחר לא יראה את הנתונים.
-
-אל תשתמשו ב-`allow read, write: if true` — כך כל מי שמכיר את כתובת האתר יכול לקרוא ולמחוק את הרשימה.
-
-### ייבוא נתונים מהגרסה הקודמת
-
-אם יש לכם נתונים שהוזנו בגרסת ה-localStorage, בכניסה הראשונה (כש-Firestore ריק) יופיע באנר ״ייבוא ל-Firebase״.
-הייבוא רץ מהדפדפן שבו הוזנו הנתונים. את הנתונים אפשר לגבות גם בעזרת כפתורי "ייצוא לאקסל".
-
-## ייצוא לאקסל
-
-הייצוא נעשה בעזרת הספרייה [`xlsx`](https://www.npmjs.com/package/xlsx) (SheetJS), בקובץ `src/utils/exportExcel.js`.
-הקבצים נוצרים עם כיוון קריאה מימין לשמאל. כדי לייצא CSV במקום xlsx מספיק לשנות את סיומת שם הקובץ ל-`.csv` בקריאה ל-`exportSheets`.
+מפתחות `firebaseConfig` אינם סוד. ההגנה היא מסך ההתחברות וחוקי `firestore.rules`, שמאפשרים גישה רק לשתי כתובות המייל שלכם.
+אל תשתמשו ב-`allow read, write: if true`.
 
 ## מבנה הפרויקט
 
 ```
 src/
-├── firebase.js              # אתחול Firebase + Auth — כאן מדביקים את המפתחות
-├── App.jsx                  # מסך הגדרה אם אין מפתחות, אחרת התחברות ואז האפליקציה
-├── WeddingApp.jsx           # האזנה ל-Firestore, פעולות CRUD, ניווט בין הדפים
-├── services/weddingApi.js   # כתיבה/עדכון/מחיקה מול Firestore
-├── pages/
-│   ├── GuestsPage.jsx
-│   ├── BudgetPage.jsx
-│   ├── TasksPage.jsx
-│   └── SeatingPage.jsx
+├── firebase.js            # אתחול Firebase + Auth (המפתחות)
+├── App.jsx                # מסך הגדרה / התחברות / האפליקציה
+├── WeddingApp.jsx         # האזנה ל-Firestore, פעולות CRUD, ניווט בין הדפים
+├── services/weddingApi.js # כתיבה/עדכון/מחיקה מול Firestore
+├── hooks/useFirestore.js  # onSnapshot (אוספים, קטגוריות, תאריך החתונה)
+├── pages/                 # GuestsPage, BudgetPage, TasksPage, SeatingPage
 ├── components/
-│   ├── common/              # Navbar, Modal, StatCard, ProgressBar, Icons...
-│   ├── guests/              # GuestStats, GuestForm, GuestTable
-│   ├── budget/              # VendorForm, VendorTable
-│   ├── tasks/               # TaskForm, TaskItem
-│   └── seating/             # TableForm, TableCard, UnassignedList
-├── hooks/useFirestore.js    # onSnapshot לכל אוסף
-└── utils/                   # constants, helpers, guestStats, exportExcel, dnd, migrateLocalData
+│   ├── auth/              # AuthGate (התחברות)
+│   ├── common/            # Navbar, Modal, StatCard, Icons...
+│   ├── guests/            # Countdown, GuestStats, GuestForm, GuestTable
+│   ├── budget/            # VendorForm, VendorTable
+│   ├── tasks/             # TaskForm, TaskItem
+│   └── seating/           # TableForm, TableCard, UnassignedList
+└── utils/                 # constants, helpers, guestStats, exportExcel, whatsapp, dnd
 ```
 
 ## התאמות נפוצות
 
-- **שמות ברירת המחדל** (אור ♥ עדן): `src/components/common/Navbar.jsx` ו-`src/utils/constants.js` (תוויות הצדדים).
-- **קטגוריות ברירת מחדל**: `DEFAULT_CATEGORIES` ב-`src/utils/constants.js`.
-- **משימות מוצעות**: `STARTER_TASKS` באותו קובץ.
-- **צבעים**: הצבע הראשי הוא `rose` של Tailwind; אפשר להחליף אותו בחיפוש-והחלפה.
+- **תוויות הצדדים, מנות, קטגוריות, טקסט הוואטסאפ**: `src/utils/constants.js`.
+- **תאריך החתונה**: בכפתור העיפרון בטיימר, בראש דף המוזמנים.

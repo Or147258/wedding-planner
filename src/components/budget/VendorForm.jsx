@@ -8,6 +8,7 @@ export default function VendorForm({ initial, onSubmit, onCancel }) {
     type: initial?.type ?? '',
     total: initial?.total ?? '',
     paid: initial?.paid ?? '',
+    balanceDueDate: initial?.balanceDueDate ?? '',
   }));
   const [error, setError] = useState('');
 
@@ -22,7 +23,13 @@ export default function VendorForm({ initial, onSubmit, onCancel }) {
     if (form.total === '' || total < 0) return setError('נא להזין עלות כוללת תקינה');
     if (paid < 0) return setError('המקדמה לא יכולה להיות שלילית');
     if (paid > total) return setError('המקדמה גבוהה מהעלות הכוללת');
-    return onSubmit({ name: form.name.trim(), type: form.type.trim(), total, paid });
+    return onSubmit({
+      name: form.name.trim(),
+      type: form.type.trim(),
+      total,
+      paid,
+      balanceDueDate: form.balanceDueDate,
+    });
   };
 
   return (
@@ -91,6 +98,19 @@ export default function VendorForm({ initial, onSubmit, onCancel }) {
             onChange={(e) => set('paid', e.target.value)}
           />
         </div>
+      </div>
+
+      <div>
+        <label className="label" htmlFor="vendor-due">
+          תאריך יעד לתשלום היתרה <span className="font-normal text-stone-400">(לא חובה)</span>
+        </label>
+        <input
+          id="vendor-due"
+          type="date"
+          className="input"
+          value={form.balanceDueDate}
+          onChange={(e) => set('balanceDueDate', e.target.value)}
+        />
       </div>
 
       <p className="rounded-xl bg-stone-50 px-4 py-3 text-sm text-stone-600">

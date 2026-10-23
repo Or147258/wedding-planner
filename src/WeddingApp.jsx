@@ -4,22 +4,21 @@ import { auth } from './firebase';
 import Navbar from './components/common/Navbar';
 import Banner from './components/common/Banner';
 import EmptyState from './components/common/EmptyState';
-import MigrationBanner from './components/common/MigrationBanner';
 import GuestsPage from './pages/GuestsPage';
 import BudgetPage from './pages/BudgetPage';
 import TasksPage from './pages/TasksPage';
 import SeatingPage from './pages/SeatingPage';
-import { useCategories, useCollection } from './hooks/useFirestore';
+import { useCategories, useCollection, useWeddingDate } from './hooks/useFirestore';
 import {
   addCategoryName,
   addItem,
   addMany,
   deleteItem,
   deleteTableAndUnseat,
+  setWeddingDate,
   updateItem,
 } from './services/weddingApi';
 import { describeFirebaseError } from './utils/firebaseErrors';
-import { hasLocalData } from './utils/migrateLocalData';
 
 const TABS = [
   { id: 'guests', label: 'מוזמנים' },
@@ -59,8 +58,6 @@ export default function WeddingApp({ user }) {
 
   const online = useOnline();
   const [actionError, setActionError] = useState('');
-  const [importDismissed, setImportDismissed] = useState(false);
-  const [localDataFound] = useState(hasLocalData);
 
   /* ---------- האזנה בזמן אמת (onSnapshot) ---------- */
   const guestsQ = useCollection('guests');
@@ -68,6 +65,7 @@ export default function WeddingApp({ user }) {
   const tasksQ = useCollection('tasks');
   const tablesQ = useCollection('tables');
   const categoriesQ = useCategories();
+  const weddingQ = useWeddingDate();
 
   const guests = guestsQ.items;
   const vendors = vendorsQ.items;
@@ -76,7 +74,7 @@ export default function WeddingApp({ user }) {
   const categories = categoriesQ.items;
 
   const dataQueries = [guestsQ, vendorsQ, tasksQ, tablesQ];
-  const allQueries = [...dataQueries, categoriesQ];
+  const allQueries = [...dataQueries, categoriesQ, weddingQ];
   const loading = allQueries.some((q) => q.loading);
   const listenError = allQueries.find((q) => q.error)?.error;
 
@@ -108,6 +106,8 @@ export default function WeddingApp({ user }) {
     return trimmed;
   };
 
+  const setWedding = (value) => safe(setWeddingDate(value));
+
   /* ---------- ספקים ---------- */
   const addVendor = (values) => safe(addItem('vendors', values));
   const updateVendor = (id, patch) => safe(updateItem('vendors', id, patch));
@@ -128,12 +128,6 @@ export default function WeddingApp({ user }) {
   };
   const assignGuest = (guestId, tableId) => updateGuest(guestId, { tableId });
 
-  // מציעים ייבוא רק כשאומת מול השרת ש-Firestore ריק
-  const offerImport =
-    localDataFound &&
-    !importDismissed &&
-    dataQueries.every((q) => q.synced && q.items.length === 0);
-
   let content;
   if (listenError) {
     content = (
@@ -148,6 +142,8 @@ export default function WeddingApp({ user }) {
           <GuestsPage
             guests={guests}
             categories={categories}
+            wedding={{ date: weddingQ.date, time: weddingQ.time }}
+            onSetWedding={setWedding}
             onAdd={addGuest}
             onUpdate={updateGuest}
             onDelete={deleteGuest}
@@ -188,7 +184,6 @@ export default function WeddingApp({ user }) {
             {actionError}
           </Banner>
         )}
-        {offerImport && <MigrationBanner onDismiss={() => setImportDismissed(true)} />}
         {content}
       </main>
     </div>

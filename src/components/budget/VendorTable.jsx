@@ -1,5 +1,31 @@
 import { PencilIcon, TrashIcon } from '../common/Icons';
-import { formatCurrency, sumBy } from '../../utils/helpers';
+import { daysUntil, formatCurrency, formatDate, sumBy } from '../../utils/helpers';
+
+// תאריך היעד לתשלום היתרה, עם סימון צבעוני כשהוא קרוב או שחלף
+function DueDate({ date, balance }) {
+  if (!date) return <span className="text-stone-300">—</span>;
+  if (balance <= 0) return <span className="text-stone-400">{formatDate(date)}</span>;
+
+  const d = daysUntil(date);
+  let note = null;
+  let cls = 'text-stone-600';
+  if (d < 0) {
+    note = d === -1 ? 'באיחור של יום' : `באיחור של ${-d} ימים`;
+    cls = 'text-red-700';
+  } else if (d === 0) {
+    note = 'היום';
+    cls = 'text-amber-700';
+  } else if (d <= 14) {
+    note = d === 1 ? 'מחר' : `בעוד ${d} ימים`;
+    cls = 'text-amber-700';
+  }
+  return (
+    <div className={cls}>
+      <p className="whitespace-nowrap tabular-nums">{formatDate(date)}</p>
+      {note && <p className="text-xs font-medium">{note}</p>}
+    </div>
+  );
+}
 
 export default function VendorTable({ vendors, onEdit, onDelete }) {
   const total = sumBy(vendors, (v) => v.total);
@@ -9,13 +35,14 @@ export default function VendorTable({ vendors, onEdit, onDelete }) {
   return (
     <div className="card overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px]">
+        <table className="w-full min-w-[820px]">
           <thead className="border-b border-stone-200 bg-stone-50">
             <tr>
               <th className="th">ספק / שירות</th>
               <th className="th">עלות כוללת</th>
               <th className="th">מקדמה ששולמה</th>
               <th className="th">יתרה לתשלום</th>
+              <th className="th">תאריך יעד ליתרה</th>
               <th className="th w-24">
                 <span className="sr-only">פעולות</span>
               </th>
@@ -40,6 +67,9 @@ export default function VendorTable({ vendors, onEdit, onDelete }) {
                     >
                       {rest > 0 ? formatCurrency(rest) : 'שולם במלואו'}
                     </span>
+                  </td>
+                  <td className="td">
+                    <DueDate date={v.balanceDueDate} balance={rest} />
                   </td>
                   <td className="td">
                     <div className="flex justify-end gap-1">
@@ -71,6 +101,7 @@ export default function VendorTable({ vendors, onEdit, onDelete }) {
               <td className="td tabular-nums">{formatCurrency(total)}</td>
               <td className="td tabular-nums">{formatCurrency(paid)}</td>
               <td className="td tabular-nums">{formatCurrency(balance)}</td>
+              <td className="td" />
               <td className="td" />
             </tr>
           </tfoot>

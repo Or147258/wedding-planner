@@ -5,12 +5,19 @@ rules_version = '2';
 // בדיוק כפי שהן מוגדרות ב-Authentication → Users.
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /guests/{id} {
-      allow read, write: if request.auth != null
+
+    function isCouple() {
+      return request.auth != null
         && request.auth.token.email in [
           'or@example.com',
           'eden@example.com'
         ];
     }
+
+    match /guests/{id}   { allow read, write: if isCouple(); }
+    match /vendors/{id}  { allow read, write: if isCouple(); }
+    match /tasks/{id}    { allow read, write: if isCouple(); }
+    match /tables/{id}   { allow read, write: if isCouple(); }
+    match /settings/{id} { allow read, write: if isCouple(); }
   }
 }

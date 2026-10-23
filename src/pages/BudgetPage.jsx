@@ -8,9 +8,16 @@ import { DownloadIcon, PlusIcon } from '../components/common/Icons';
 import VendorForm from '../components/budget/VendorForm';
 import VendorTable from '../components/budget/VendorTable';
 import { exportSheets } from '../utils/exportExcel';
-import { formatCurrency, percent, sumBy } from '../utils/helpers';
+import { formatCurrency, formatDate, percent, sumBy } from '../utils/helpers';
 
-const HEADER = ['סוג שירות', 'שם הספק / שירות', 'עלות כוללת', 'מקדמה ששולמה', 'יתרה לתשלום'];
+const HEADER = [
+  'סוג שירות',
+  'שם הספק / שירות',
+  'עלות כוללת',
+  'מקדמה ששולמה',
+  'יתרה לתשלום',
+  'תאריך יעד לתשלום היתרה',
+];
 
 export default function BudgetPage({ vendors, onAdd, onUpdate, onDelete }) {
   const [modal, setModal] = useState({ open: false, vendor: null });
@@ -38,6 +45,7 @@ export default function BudgetPage({ vendors, onAdd, onUpdate, onDelete }) {
       'עלות כוללת': v.total,
       'מקדמה ששולמה': v.paid,
       'יתרה לתשלום': v.total - v.paid,
+      'תאריך יעד לתשלום היתרה': formatDate(v.balanceDueDate),
     }));
     rows.push({
       'סוג שירות': '',
@@ -45,9 +53,10 @@ export default function BudgetPage({ vendors, onAdd, onUpdate, onDelete }) {
       'עלות כוללת': total,
       'מקדמה ששולמה': paid,
       'יתרה לתשלום': balance,
+      'תאריך יעד לתשלום היתרה': '',
     });
     exportSheets('תקציב_וספקים.xlsx', [
-      { name: 'תקציב וספקים', rows, header: HEADER, widths: [16, 30, 16, 16, 16] },
+      { name: 'תקציב וספקים', rows, header: HEADER, widths: [16, 30, 16, 16, 16, 24] },
     ]);
   };
 

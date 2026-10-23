@@ -55,3 +55,22 @@ export function useCategories() {
 
   return state;
 }
+
+/** תאריך החתונה (settings/wedding). date הוא null עד שהוגדר. */
+export function useWeddingDate() {
+  const [state, setState] = useState({ date: null, time: '19:00', loading: true, error: null });
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      doc(db, 'settings', 'wedding'),
+      (snap) => {
+        const data = snap.exists() ? snap.data() : {};
+        setState({ date: data.date ?? null, time: data.time ?? '19:00', loading: false, error: null });
+      },
+      (error) => setState((s) => ({ ...s, loading: false, error }))
+    );
+    return unsubscribe;
+  }, []);
+
+  return state;
+}
