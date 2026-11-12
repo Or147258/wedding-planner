@@ -2,11 +2,12 @@ import { useState } from 'react';
 import PageHeader from '../components/common/PageHeader';
 import Modal from '../components/common/Modal';
 import EmptyState from '../components/common/EmptyState';
-import { DownloadIcon, PlusIcon, SearchIcon } from '../components/common/Icons';
+import { DownloadIcon, PlusIcon, SearchIcon, UploadIcon } from '../components/common/Icons';
 import Countdown from '../components/guests/Countdown';
 import GuestStats from '../components/guests/GuestStats';
 import GuestForm from '../components/guests/GuestForm';
 import GuestTable from '../components/guests/GuestTable';
+import ImportGuests from '../components/guests/ImportGuests';
 import { MEALS, RSVP, SIDES } from '../utils/constants';
 import { computeGuestStats, mealsOf } from '../utils/guestStats';
 import { exportSheets } from '../utils/exportExcel';
@@ -39,8 +40,10 @@ export default function GuestsPage({
   onUpdate,
   onDelete,
   onAddCategory,
+  onImport,
 }) {
   const [modal, setModal] = useState({ open: false, guest: null });
+  const [importOpen, setImportOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [sideFilter, setSideFilter] = useState('all');
   const [rsvpFilter, setRsvpFilter] = useState('all');
@@ -105,6 +108,10 @@ export default function GuestsPage({
   return (
     <>
       <PageHeader title="ניהול מוזמנים" subtitle="הוספה, עריכה ומעקב אחרי אישורי הגעה">
+        <button type="button" className="btn-secondary" onClick={() => setImportOpen(true)}>
+          <UploadIcon />
+          ייבוא מאקסל
+        </button>
         <button type="button" className="btn-export" onClick={handleExport} disabled={!guests.length}>
           <DownloadIcon />
           ייצוא לאקסל
@@ -202,6 +209,14 @@ export default function GuestsPage({
           )}
         </>
       )}
+
+      <ImportGuests
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        existing={guests}
+        categories={categories}
+        onImport={onImport}
+      />
 
       <Modal
         open={modal.open}

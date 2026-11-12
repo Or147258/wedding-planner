@@ -11,6 +11,7 @@ import SeatingPage from './pages/SeatingPage';
 import { useCategories, useCollection, useWeddingDate } from './hooks/useFirestore';
 import {
   addCategoryName,
+  addCategoryNames,
   addItem,
   addMany,
   deleteItem,
@@ -97,6 +98,12 @@ export default function WeddingApp({ user }) {
 
   const deleteGuest = (id) => safe(deleteItem('guests', id));
 
+  // ייבוא מאקסל: המוזמנים + קטגוריות חדשות שהופיעו בקובץ
+  const importGuests = (list, newCategories) => {
+    safe(addMany('guests', list.map((g) => ({ ...g, tableId: null }))));
+    if (newCategories.length) safe(addCategoryNames(newCategories));
+  };
+
   // מחזיר את שם הקטגוריה (הקיימת, אם כבר יש כזו) כדי שהטופס יוכל לבחור בה מיד
   const addCategory = (name) => {
     const trimmed = name.trim();
@@ -148,6 +155,7 @@ export default function WeddingApp({ user }) {
             onUpdate={updateGuest}
             onDelete={deleteGuest}
             onAddCategory={addCategory}
+            onImport={importGuests}
           />
         )}
         {page === 'budget' && (

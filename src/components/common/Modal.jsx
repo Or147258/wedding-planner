@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { CloseIcon } from './Icons';
 
-export default function Modal({ open, title, onClose, children }) {
+export default function Modal({ open, title, onClose, wide = false, children }) {
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (e) => e.key === 'Escape' && onClose();
@@ -20,7 +20,7 @@ export default function Modal({ open, title, onClose, children }) {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="card max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-b-none p-6 shadow-xl sm:rounded-b-2xl"
+        className={`card max-h-[92vh] w-full ${wide ? 'max-w-3xl' : 'max-w-lg'} overflow-y-auto rounded-b-none p-6 shadow-xl sm:rounded-b-2xl`}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="mb-5 flex items-center justify-between">

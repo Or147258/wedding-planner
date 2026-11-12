@@ -6,6 +6,7 @@ import {
   LuPlus,
   LuSearch,
   LuTrash2,
+  LuUpload,
   LuX,
 } from 'react-icons/lu';
 
@@ -19,6 +20,7 @@ export const PlusIcon = wrap(LuPlus);
 export const TrashIcon = wrap(LuTrash2);
 export const PencilIcon = wrap(LuPencil);
 export const DownloadIcon = wrap(LuDownload);
+export const UploadIcon = wrap(LuUpload);
 export const CloseIcon = wrap(LuX);
 export const CheckIcon = wrap(LuCheck);
 export const SearchIcon = wrap(LuSearch);

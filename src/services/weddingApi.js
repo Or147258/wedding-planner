@@ -28,14 +28,18 @@ export const updateItem = (col, id, patch) => updateDoc(doc(db, col, id), patch)
 
 export const deleteItem = (col, id) => deleteDoc(doc(db, col, id));
 
-// הוספת כמה פריטים בפעולה אחת (למשל כמה שולחנות ברצף, או משימות מוצעות)
-export function addMany(col, list) {
-  const batch = writeBatch(db);
+// הוספת כמה פריטים (למשל כמה שולחנות ברצף, משימות מוצעות או ייבוא מאקסל).
+// Firestore מגביל batch ל-500 פעולות, לכן שולחים בקבוצות.
+export async function addMany(col, list) {
   const base = Date.now();
-  list.forEach((data, i) => {
-    batch.set(doc(collection(db, col)), { ...data, createdAt: base + i });
-  });
-  return batch.commit();
+  for (let i = 0; i < list.length; i += 400) {
+    const batch = writeBatch(db);
+    list.slice(i, i + 400).forEach((data, j) => {
+      batch.set(doc(collection(db, col)), { ...data, createdAt: base + i + j });
+    });
+    // eslint-disable-next-line no-await-in-loop
+    await batch.commit();
+  }
 }
 
 // מחיקת שולחן + שחרור כל ההזמנות שהיו משובצות אליו, באותה פעולה אטומית
@@ -59,3 +63,11 @@ export const addCategoryName = (name) =>
 // תאריך ושעת החתונה (לטיימר) — settings/wedding → { date: 'YYYY-MM-DD', time: 'HH:MM' }
 export const setWeddingDate = ({ date, time }) =>
   setDoc(doc(db, 'settings', 'wedding'), { date, time }, { merge: true });
+
+// הוספת כמה קטגוריות בבת אחת (arrayUnion מונע כפילויות)
+export const addCategoryNames = (names) =>
+  setDoc(
+    doc(db, 'settings', 'categories'),
+    { list: arrayUnion(...DEFAULT_CATEGORIES, ...names) },
+    { merge: true }
+  );
