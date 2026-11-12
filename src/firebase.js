@@ -19,14 +19,13 @@ import {
 const env = import.meta.env;
 
 const firebaseConfig = {
-  apiKey: env.VITE_FIREBASE_API_KEY || '',
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || '',
-  projectId: env.VITE_FIREBASE_PROJECT_ID || '',
-  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || '',
-  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-  appId: env.VITE_FIREBASE_APP_ID || '',
+  apiKey: 'AIzaSyDzQBAWWOcrJVkDFduecBv0j8gj4c4Ks0Q',
+  authDomain: 'wedding-planner-110dd.firebaseapp.com',
+  projectId: 'wedding-planner-110dd',
+  storageBucket: 'wedding-planner-110dd.firebasestorage.app',
+  messagingSenderId: '670936078654',
+  appId: '1:670936078654:web:26d374bf304a4ebf5d746f',
 };
-
 // כל עוד המפתחות ריקים האפליקציה מציגה מסך הסבר במקום להתרסק
 export const isFirebaseConfigured = Boolean(firebaseConfig.apiKey && firebaseConfig.projectId);
 
